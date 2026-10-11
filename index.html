@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#160c26" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" type="image/png" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>Zucca di Jack</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 20%, #2a1a3d 0%, #120a1f 60%, #05030a 100%);
+    color: #fff;
+    padding: 24px 16px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  h1 {
+    font-size: 1.6rem;
+    color: #ff8c1a;
+    text-shadow: 0 0 12px rgba(255,140,26,0.6);
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .subtitle {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  /* pulsante di connessione */
+  #connectBtn {
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 20px;
+    padding: 18px 12px;
+    border-radius: 16px;
+    border: 2px solid #ff8c1a;
+    background: rgba(255,140,26,0.12);
+    color: #ffb15c;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  #connectBtn.connected {
+    border-color: #4caf50;
+    background: rgba(76,175,80,0.12);
+    color: #8be28f;
+  }
+  #connectBtn:disabled { opacity: 0.6; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+    transition: opacity 0.2s ease;
+  }
+  .grid.locked { opacity: 0.35; pointer-events: none; }
+
+  .color-btn {
+    border: none;
+    border-radius: 16px;
+    padding: 28px 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .color-btn:active { transform: scale(0.95); }
+  .btn-rosso  { background: linear-gradient(135deg, #ff3d3d, #a30000); box-shadow: 0 4px 20px rgba(255,61,61,0.4); }
+  .btn-blu    { background: linear-gradient(135deg, #3d6bff, #00269e); box-shadow: 0 4px 20px rgba(61,107,255,0.4); }
+  .btn-verde  { background: linear-gradient(135deg, #3dff7a, #009e3a); box-shadow: 0 4px 20px rgba(61,255,122,0.4); }
+  .btn-bianco { background: linear-gradient(135deg, #ffffff, #b8b8b8); box-shadow: 0 4px 20px rgba(255,255,255,0.35); color: #1a1a1a; }
+  .btn-off    { background: linear-gradient(135deg, #555, #1a1a1a); box-shadow: 0 4px 20px rgba(0,0,0,0.4); grid-column: span 2; }
+
+  .status {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #888; flex: none; }
+  .dot.ok { background: #4caf50; animation: pulse 2s infinite; }
+  .dot.wait { background: #ffb300; animation: pulse 1s infinite; }
+  .dot.err { background: #f44336; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  #unsupported {
+    display: none;
+    max-width: 360px;
+    margin-top: 20px;
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(244,67,54,0.15);
+    border: 1px solid rgba(244,67,54,0.5);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <h1>🎃 Zucca di Jack</h1>
+  <div class="subtitle">Controllo Bluetooth · v2.0</div>
+
+  <button id="connectBtn" type="button">CONNETTI ALLA ZUCCA</button>
+
+  <div class="grid locked" id="grid">
+    <button class="color-btn btn-rosso"  data-cmd="rosso"  type="button">ROSSO</button>
+    <button class="color-btn btn-blu"    data-cmd="blu"    type="button">BLU</button>
+    <button class="color-btn btn-verde"  data-cmd="verde"  type="button">VERDE</button>
+    <button class="color-btn btn-bianco" data-cmd="bianco" type="button">BIANCO</button>
+    <button class="color-btn btn-off"    data-cmd="off"    type="button">SPEGNI</button>
+  </div>
+
+  <div class="status">
+    <div class="dot" id="dot"></div>
+    <span id="statusText">non connesso</span>
+  </div>
+
+  <div id="unsupported">
+    Questo browser non supporta il Bluetooth web.<br>
+    Apri la pagina con Chrome su Android.
+  </div>
+
+<script>
+// Gli UUID devono essere identici a quelli dello script sulla scheda (zucca_ble.py)
+const SERVICE_UUID = '12345678-1234-5678-1234-56789abcdef0';
+const CHAR_UUID    = '12345678-1234-5678-1234-56789abcdef1';
+const DEVICE_NAME  = 'ZuccaDiJack';
+
+let device = null;
+let characteristic = null;
+let reconnecting = false;
+
+const connectBtn = document.getElementById('connectBtn');
+const grid = document.getElementById('grid');
+const dot = document.getElementById('dot');
+const statusText = document.getElementById('statusText');
+
+function setStatus(text, kind) {
+  statusText.textContent = text;
+  dot.className = 'dot ' + (kind || '');
+}
+
+function setConnected(isConnected) {
+  grid.classList.toggle('locked', !isConnected);
+  connectBtn.classList.toggle('connected', isConnected);
+  connectBtn.textContent = isConnected ? 'COLLEGATO ✓' : (device ? 'RICONNETTI' : 'CONNETTI ALLA ZUCCA');
+  connectBtn.disabled = false;
+}
+
+async function openGatt() {
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService(SERVICE_UUID);
+  characteristic = await service.getCharacteristic(CHAR_UUID);
+  setConnected(true);
+  setStatus('collegato', 'ok');
+}
+
+async function connect() {
+  connectBtn.disabled = true;
+  setStatus('connessione…', 'wait');
+  try {
+    if (!device) {
+      device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [SERVICE_UUID]
+      });
+      device.addEventListener('gattserverdisconnected', onDisconnected);
+    }
+    await openGatt();
+  } catch (e) {
+    console.error(e);
+    setConnected(false);
+    setStatus(e && e.name === 'NotFoundError' ? 'nessun dispositivo scelto' : 'connessione fallita, riprova', 'err');
+  }
+}
+
+// Se la connessione cade, la pagina riprova da sola alcune volte
+async function onDisconnected() {
+  characteristic = null;
+  setConnected(false);
+  if (reconnecting || !device) return;
+  reconnecting = true;
+  for (let i = 1; i <= 5; i++) {
+    setStatus('riconnessione (' + i + '/5)…', 'wait');
+    try {
+      await new Promise(r => setTimeout(r, 1500));
+      await openGatt();
+      reconnecting = false;
+      return;
+    } catch (e) { /* riprovo */ }
+  }
+  reconnecting = false;
+  setConnected(false);
+  setStatus('scollegato: premi RICONNETTI', 'err');
+}
+
+async function send(cmd) {
+  if (!characteristic) { setStatus('non connesso', 'err'); return; }
+  try {
+    const data = new TextEncoder().encode(cmd);
+    if (characteristic.writeValueWithResponse) {
+      await characteristic.writeValueWithResponse(data);
+    } else {
+      await characteristic.writeValue(data);
+    }
+    setStatus('inviato: ' + cmd, 'ok');
+    if (navigator.vibrate) navigator.vibrate(20);
+  } catch (e) {
+    console.error(e);
+    setStatus('invio fallito, riconnetto…', 'err');
+    onDisconnected();
+  }
+}
+
+connectBtn.addEventListener('click', () => {
+  if (!characteristic) connect();
+});
+document.querySelectorAll('.color-btn').forEach(b => {
+  b.addEventListener('click', () => send(b.dataset.cmd));
+});
+
+if (!('bluetooth' in navigator)) {
+  document.getElementById('unsupported').style.display = 'block';
+  connectBtn.disabled = true;
+  setStatus('Bluetooth non supportato', 'err');
+}
+
+// Service worker: permette l'uso offline e l'installazione come app
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
