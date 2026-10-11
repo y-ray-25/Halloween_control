@@ -116,9 +116,85 @@
     line-height: 1.4;
     text-align: center;
   }
+
+  /* pulsante per scollegarsi */
+  #disconnectBtn {
+    width: 100%;
+    max-width: 360px;
+    margin-top: 16px;
+    padding: 14px 12px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.28);
+    background: transparent;
+    color: rgba(255,255,255,0.75);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  #disconnectBtn:disabled { opacity: 0.3; }
+
+  /* decorazioni di Halloween: ragnatele e ragni (non cliccabili) */
+  body > *:not(.deco):not(svg) { position: relative; z-index: 1; }
+  .deco { position: fixed; pointer-events: none; z-index: 0; }
+  .web { width: min(34vw, 130px); height: min(34vw, 130px); opacity: 0.5; }
+  .web-tl { top: 0; left: 0; }
+  .web-tr { top: 0; right: 0; transform: scaleX(-1); }
+  .web-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+  .web-br { bottom: 0; right: 0; transform: scale(-1, -1); }
+  .web path { fill: none; stroke: #cfc6e6; stroke-width: 1; stroke-linecap: round; }
+  .hang {
+    top: 0; right: 5%;
+    display: flex; flex-direction: column; align-items: center;
+    transform-origin: top center;
+    animation: swing 3.6s ease-in-out infinite alternate;
+  }
+  .hang .thread { width: 1.5px; height: 90px; background: rgba(230,224,245,0.55); }
+  .hang svg { width: 44px; height: 41px; }
+  .spider-small { bottom: 14px; right: 36%; width: 30px; height: 28px; opacity: 0.9; }
+  .spider-web { top: 30px; left: 34px; width: 28px; height: 26px; }
+  @keyframes swing { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+  @media (prefers-reduced-motion: reduce) { .hang { animation: none; } }
 </style>
 </head>
 <body>
+  <!-- disegni riutilizzabili: ragnatela e ragno -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="webshape" viewBox="0 0 150 150">
+        <path d="M0 0L150.0 0.0M0 0L138.6 57.4M0 0L106.1 106.1M0 0L57.4 138.6M0 0L0.0 150.0M35.0 0.0Q29.0 5.8 32.3 13.4M32.3 13.4Q24.5 16.4 24.7 24.7M24.7 24.7Q16.4 24.5 13.4 32.3M13.4 32.3Q5.8 29.0 0.0 35.0M65.0 0.0Q53.8 10.7 60.1 24.9M60.1 24.9Q45.6 30.5 46.0 46.0M46.0 46.0Q30.5 45.6 24.9 60.1M24.9 60.1Q10.7 53.8 0.0 65.0M95.0 0.0Q78.6 15.6 87.8 36.4M87.8 36.4Q66.6 44.5 67.2 67.2M67.2 67.2Q44.5 66.6 36.4 87.8M36.4 87.8Q15.6 78.6 0.0 95.0M125.0 0.0Q103.4 20.6 115.5 47.8M115.5 47.8Q87.7 58.6 88.4 88.4M88.4 88.4Q58.6 87.7 47.8 115.5M47.8 115.5Q20.6 103.4 0.0 125.0M150.0 0.0Q124.1 24.7 138.6 57.4M138.6 57.4Q105.2 70.3 106.1 106.1M106.1 106.1Q70.3 105.2 57.4 138.6M57.4 138.6Q24.7 124.1 0.0 150.0" fill="none" stroke="#cfc6e6" stroke-width="1" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="spider" viewBox="0 0 60 56">
+        <g fill="none" stroke="#8a5cc7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="25,28 12,12 4,22"/>
+          <polyline points="24,31 8,24 1,36"/>
+          <polyline points="24,35 8,36 2,50"/>
+          <polyline points="26,39 13,46 8,55"/>
+          <polyline points="35,28 48,12 56,22"/>
+          <polyline points="36,31 52,24 59,36"/>
+          <polyline points="36,35 52,36 58,50"/>
+          <polyline points="34,39 47,46 52,55"/>
+        </g>
+        <ellipse cx="30" cy="37" rx="9" ry="10" fill="#0d0716" stroke="#8a5cc7" stroke-width="1.4"/>
+        <circle cx="30" cy="25" r="6" fill="#0d0716" stroke="#8a5cc7" stroke-width="1.4"/>
+        <path d="M30 31l3 5-3 5-3-5z" fill="#ff8c1a" opacity="0.85"/>
+        <circle cx="27.5" cy="24" r="1.4" fill="#ff8c1a"/>
+        <circle cx="32.5" cy="24" r="1.4" fill="#ff8c1a"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- decorazioni -->
+  <svg class="deco web web-tl" viewBox="0 0 150 150" aria-hidden="true"><use href="#webshape"/></svg>
+  <svg class="deco web web-tr" viewBox="0 0 150 150" aria-hidden="true"><use href="#webshape"/></svg>
+  <svg class="deco web web-bl" viewBox="0 0 150 150" aria-hidden="true"><use href="#webshape"/></svg>
+  <svg class="deco web web-br" viewBox="0 0 150 150" aria-hidden="true"><use href="#webshape"/></svg>
+  <svg class="deco spider-web" viewBox="0 0 60 56" aria-hidden="true"><use href="#spider"/></svg>
+  <svg class="deco spider-small" viewBox="0 0 60 56" aria-hidden="true"><use href="#spider"/></svg>
+  <div class="deco hang" aria-hidden="true">
+    <div class="thread"></div>
+    <svg viewBox="0 0 60 56"><use href="#spider"/></svg>
+  </div>
+
   <h1>🎃 Zucca di Jack</h1>
   <div class="subtitle">Controllo Bluetooth · v2.0</div>
 
@@ -131,6 +207,8 @@
     <button class="color-btn btn-bianco" data-cmd="bianco" type="button">BIANCO</button>
     <button class="color-btn btn-off"    data-cmd="off"    type="button">SPEGNI</button>
   </div>
+
+  <button id="disconnectBtn" type="button" disabled>SCOLLEGA</button>
 
   <div class="status">
     <div class="dot" id="dot"></div>
@@ -151,8 +229,10 @@ const DEVICE_NAME  = 'ZuccaDiJack';
 let device = null;
 let characteristic = null;
 let reconnecting = false;
+let manualDisconnect = false;
 
 const connectBtn = document.getElementById('connectBtn');
+const disconnectBtn = document.getElementById('disconnectBtn');
 const grid = document.getElementById('grid');
 const dot = document.getElementById('dot');
 const statusText = document.getElementById('statusText');
@@ -167,6 +247,15 @@ function setConnected(isConnected) {
   connectBtn.classList.toggle('connected', isConnected);
   connectBtn.textContent = isConnected ? 'COLLEGATO ✓' : (device ? 'RICONNETTI' : 'CONNETTI ALLA ZUCCA');
   connectBtn.disabled = false;
+  disconnectBtn.disabled = !isConnected;
+}
+
+function disconnect() {
+  manualDisconnect = true;
+  characteristic = null;
+  if (device && device.gatt && device.gatt.connected) device.gatt.disconnect();
+  setConnected(false);
+  setStatus('scollegato', '');
 }
 
 async function openGatt() {
@@ -178,6 +267,7 @@ async function openGatt() {
 }
 
 async function connect() {
+  manualDisconnect = false;
   connectBtn.disabled = true;
   setStatus('connessione…', 'wait');
   try {
@@ -200,9 +290,10 @@ async function connect() {
 async function onDisconnected() {
   characteristic = null;
   setConnected(false);
-  if (reconnecting || !device) return;
+  if (manualDisconnect || reconnecting || !device) return;
   reconnecting = true;
   for (let i = 1; i <= 5; i++) {
+    if (manualDisconnect) break;
     setStatus('riconnessione (' + i + '/5)…', 'wait');
     try {
       await new Promise(r => setTimeout(r, 1500));
@@ -237,6 +328,7 @@ async function send(cmd) {
 connectBtn.addEventListener('click', () => {
   if (!characteristic) connect();
 });
+disconnectBtn.addEventListener('click', disconnect);
 document.querySelectorAll('.color-btn').forEach(b => {
   b.addEventListener('click', () => send(b.dataset.cmd));
 });

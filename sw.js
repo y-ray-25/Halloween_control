@@ -1,5 +1,5 @@
 // Service worker minimo: salva i file dell'app così si apre anche senza internet
-const CACHE = 'zucca-v2';
+const CACHE = 'zucca-v3';
 const FILES = [
   './',
   './index.html',
